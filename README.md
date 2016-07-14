@@ -42,10 +42,10 @@ Special writing methods is implemented for correcting sentences. Details are des
 
 |Syntax|Description|
 |---|---|
-|`[``A|B]`| Replace A by B|
-|`[``A|]`| Delete A|
-|`[``|B]`| Insert B|
-|`((``comment))`| Add a comment|
+|&#91;A&#x7c;B]| Replace A by B|
+|&#91;A&#x7c;]| Delete A|
+|&#91;&#x7c;B]| Insert B|
+|&#x28;&#x28;comment))| Add a comment|
 
 
 ## Requirement

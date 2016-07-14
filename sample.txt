@@ -1,21 +1,17 @@
-# Proofying Viewer
-[あ|日本語も使えます]
+# Example
+## Replacing Word: [A&#x7c;B]
+This is a example of the [righting|writing] method to replace words.
 
-[Jere|Here] is [|a] [some|sample] code:
+- [hoge|fuga]
+- [piyo|homu]
 
-```python
-print(123)
-```
+This method can be used inside of w[a|o]rds.
 
-[hoge|fuga]
+## Deleting word: [A&#x7c;]
+By omitting B, a [word|] is deleted by a striking line. [Of course, a whole sentence can be deteted.|] Note that this method is not available to delete a blank space.
 
-|a|b|c|d|
-|---|---|---|---|
-|hoge|fuga|piyo|homu|
+## Inserting word: [&#x7c;B]
+By omitting A, a word is [|easily] inserted. [|A whole sentence is also inserted using the same method.] As mentioned above, this method cannot used to insert blank space.
 
-Calculate((Obtain?)) a Fourier transformation of $\sin{x}$:
-
-$$
-\mathcal{F}(\omega) =
-\int^\infty_{-\infty}\sin{x}{\rm e}^{-i\omega{x}}\,{\rm d}x
-$$
+## Inserting comments: &#x28;(comment))
+You can add comments by &#x28;(comment)).((A comment is shown like this.)) Note that the parentheses `(` and `)` are not available inside a comment. Currently this feature is implemented by underlining. This will be replaced by footnoting in near future.

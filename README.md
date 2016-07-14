@@ -17,8 +17,8 @@ proofying -m manuscript_with_math.md
 ## Description
 This program displays a markdown document using `misaka`, a fast markdown processing library, in a window. The document is immediately reloaded when the program detect updates in the document.
 
+### Extensions
 Building a code block by indent is disabled. Instead, a `fenced-code` option is enabled. The default extensions for `misaka` is summarized in the table below:
-
 
 |Option|Description|
 |---|---|
@@ -34,7 +34,18 @@ Building a code block by indent is disabled. Instead, a `fenced-code` option is 
 
 Since `skip-html` and `escape` is enabled, any HTML tags are removed to prevent an attack using JavaScript.
 
+### Mathematics
 MathJax is enabled by enabling an option `-m`. This downloads a code from http://cdn.mathjax.org. Thus, an Internet connection is required to convert mathematical expressions using MathJax. Note that this option allows MathJax to convert `$expression$` into a mathematical expression. A dollar sign should be used with particular care.
+
+### Correcting Sentences
+Special writing methods is implemented for correcting sentences. Details are described in the table below. How to use these methods are also written in the sample text file ([sample.txt](https://github.com/xr0038/proofying/blob/master/sample.txt)).
+
+|Syntax|Description|
+|---|---|
+|`[``A|B]`| Replace A by B|
+|`[``A|]`| Delete A|
+|`[``|B]`| Insert B|
+|`((``comment))`| Add a comment|
 
 
 ## Requirement

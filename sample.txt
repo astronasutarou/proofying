@@ -1,0 +1,21 @@
+# Proofying Viewer
+[あ|日本語も使えます]
+
+[Jere|Here] is [|a] [some|sample] code:
+
+```python
+print(123)
+```
+
+[hoge|fuga]
+
+|a|b|c|d|
+|---|---|---|---|
+|hoge|fuga|piyo|homu|
+
+Calculate((Obtain?)) a Fourier transformation of $\sin{x}$:
+
+$$
+\mathcal{F}(\omega) =
+\int^\infty_{-\infty}\sin{x}{\rm e}^{-i\omega{x}}\,{\rm d}x
+$$

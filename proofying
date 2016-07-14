@@ -1,0 +1,143 @@
+#!/usr/bin/env python2.7
+# -*- coding:utf-8 -*-
+from __future__ import print_function
+import sys,os,re,time,signal
+import codecs,misaka
+from argparse import ArgumentParser
+from subprocess import check_output
+from PyQt4 import QtGui
+from PyQt4.QtCore import Qt,QTimer
+from PyQt4.QtWebKit import QWebView
+
+def eprint(*args, **kwargs):
+    print(*args, file=sys.stderr, **kwargs)
+
+class fileViewer(QtGui.QMainWindow):
+    def __init__(self,path):
+        super(fileViewer,self).__init__()
+        self.path = path
+        self.printer = QtGui.QPrinter()
+
+        self.initLayout()
+        self.initMenu()
+        self.updateStatusBar(self.path)
+        self.setupViewer()
+    def initLayout(self):
+        self.setWindowTitle('Proofying Viewer')
+        self.view = QWebView()
+        self.setCentralWidget(self.view)
+        self.updateStatusBar('{0}'.format(self.path))
+    def initMenu(self):
+        exitAction = QtGui.QAction(
+            QtGui.QIcon('exit.png'), '&Exit', self)
+        exitAction.setShortcut('Ctrl+W')
+        exitAction.setStatusTip('Exit application')
+        exitAction.triggered.connect(QtGui.qApp.quit)
+        printAction = QtGui.QAction(
+            QtGui.QIcon('print.png'), '&Print', self)
+        printAction.setShortcut('Ctrl+P')
+        printAction.setStatusTip('Print page')
+        printAction.triggered.connect(self.print_)
+        previewAction = QtGui.QAction(
+            QtGui.QIcon('preview.png'), 'Print Preview', self)
+        previewAction.setShortcut('Ctrl+Shift+P')
+        previewAction.setStatusTip('Show print preview')
+        previewAction.triggered.connect(self.preview_)
+        menubar = self.menuBar()
+        fileMenu = menubar.addMenu('&File')
+        fileMenu.addAction(exitAction)
+        fileMenu.addAction(printAction)
+        fileMenu.addAction(previewAction)
+    def updateStatusBar(self,message):
+        self.statusBar().showMessage(message)
+    def setupViewer(self):
+        exts = ('fenced-code','disable-indented-code',
+                'underline','highlight','quote','math',
+                'footnotes','tables','strikethrough')
+        flags= ('skip-html','escape')
+        self.md = misaka.Markdown(misaka.HtmlRenderer(flags),extensions=exts)
+        self.md5sum = None
+        self.scroll_done = True
+        self.scroll_x = 0
+        self.scroll_y = 0
+        self.timer = QTimer()
+        self.timer.setInterval(100)
+        self.timer.timeout.connect(self.updateContent)
+        self.timer.start()
+        self.delete  = re.compile(r'\[([^\[\]]*)\|\]')
+        self.insert  = re.compile(r'\[\|([^\[\]]*)\]')
+        self.replace = re.compile(r'\[([^\[\]]*)\|([^\[\]]*)\]')
+        self.comment = re.compile(r'\(\(([^\(\)]*)\)\)')
+    def updateContent(self):
+        try:
+            os.stat(self.path)
+            md5sum = check_output(('md5sum', self.path))
+            if not self.scroll_done:
+                mf = self.view.page().mainFrame()
+                if mf.scrollBarMaximum(Qt.Vertical)>0:
+                    mf.scroll(self.scroll_x, self.scroll_y)
+                    self.scroll_done = True
+            if (self.md5sum != md5sum):
+                self.updateStatusBar('Updating...')
+                self.md5sum = md5sum
+                with codecs.open(self.path,'r','utf-8') as f:
+                    self.text = self.preparse_(f.read())
+                    f.close()
+                    html = u'''<html><head>{0}</head><body>{1}{2}</body></html>
+                '''.format(style,self.md(self.text),mathjax)
+                    self.layout().removeWidget(self.view)
+                    mf = self.view.page().mainFrame()
+                    self.scroll_x = mf.scrollBarValue(Qt.Horizontal)
+                    self.scroll_y = mf.scrollBarValue(Qt.Vertical)
+                    self.scroll_done = False
+                    self.view.setParent(None)
+                    self.view = QWebView()
+                    self.view.setHtml(html)
+                    self.setCentralWidget(self.view)
+                    self.updateStatusBar(
+                        'Update Done. [{0}]'.format(
+                            time.strftime('%Y-%m-%d %H:%M:%S')))
+        except Exception as e:
+            eprint(e)
+            QtGui.qApp.quit()
+    def preparse_(self,text):
+        text = self.comment.sub(r'_\1_',text)
+        text = self.delete.sub(r'~~\1~~',text)
+        text = self.insert.sub(r'__\1__',text)
+        text = self.replace.sub(r'~~\1~~__\2__',text)
+        return text
+    def print_(self):
+        dialog = QtGui.QPrintDialog()
+        if dialog.exec_() == QtGui.QDialog.Accepted:
+            self.view.print_(dialog.printer())
+    def preview_(self):
+        dialog = QtGui.QPrintPreviewDialog()
+        dialog.paintRequested.connect(self.view.print_)
+        dialog.exec_()
+
+
+if __name__ == '__main__':
+    signal.signal(signal.SIGINT, signal.SIG_DFL)
+    parser = ArgumentParser(
+        'Show and print a proof copy in a fancy style.')
+    parser.add_argument(
+        'path', metavar='FILE', type=str,
+        help='filename to be displayed')
+    parser.add_argument(
+        '--mathjax', dest='mathjax', action='store_true',
+        help='enable mathjax engine [network required]')
+    parser.add_argument(
+        '-m', dest='mathjax', action='store_true',
+        help='enable mathjax engine [network required]')
+    args = parser.parse_args()
+
+    style=u"""<style>strong{color:red;font-weight:400;}u{color:green;}</style>"""
+    mathjax=u""""""
+
+    if (args.mathjax):
+        mathjax=u"""<script type="text/x-mathjax-config">MathJax.Hub.Config({ tex2jax: {inlineMath: [ ['$','$'] ]} });</script><script src="http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS_HTML" language="JavaScript"></script>"""
+    path = os.path.abspath(args.path)
+    app = QtGui.QApplication(sys.argv)
+    win = fileViewer(path)
+    win.show()
+    app.exec_()

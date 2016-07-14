@@ -47,6 +47,9 @@ Special writing methods is implemented for correcting sentences. Details are des
 |&#91;&#x7c;B]| Insert B|
 |&#x28;&#x28;comment))| Add a comment|
 
+### Menu
+A `File` menu is implemented, containing `Exit`, `Print`, and `Print Preview`. You can print out the corrected document from a printer or into a pdf file.
+
 
 ## Requirement
 This program is depend on these packages:

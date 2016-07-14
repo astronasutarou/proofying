@@ -1,5 +1,5 @@
 # Proofying Viewer
-[![Github All Releases](https://img.shields.io/github/downloads/xr0038/proofying/total.svg?maxAge=2592000)](https://github.com/xr0038/proofying/) [![Python3](https://img.shields.io/badge/python-3-blue.svg)]() [![GPL3]( https://img.shields.io/badge/license-GPL3.0-blue.svg )](https://github.com/xr0038/proofying/blob/master/LICENSE)
+[![Github All Releases](https://img.shields.io/github/downloads/xr0038/proofying/total.svg?maxAge=2592000)](https://github.com/xr0038/proofying/) [![Python2.7](https://img.shields.io/badge/python-2,3-blue.svg)]() [![GPL3]( https://img.shields.io/badge/license-GPL3.0-blue.svg )](https://github.com/xr0038/proofying/blob/master/LICENSE)
 
 A simple markdown viewer for displaying proofreading written in Python.
 

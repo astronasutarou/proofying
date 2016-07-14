@@ -64,10 +64,10 @@ class fileViewer(QtGui.QMainWindow):
         self.timer.setInterval(100)
         self.timer.timeout.connect(self.updateContent)
         self.timer.start()
-        self.delete  = re.compile(r'\[([^\[\]]*)\|\]')
-        self.insert  = re.compile(r'\[\|([^\[\]]*)\]')
-        self.replace = re.compile(r'\[([^\[\]]*)\|([^\[\]]*)\]')
-        self.comment = re.compile(r'\(\(([^\(\)]*)\)\)')
+        self.delete  = re.compile(r'\[([^\[\]`]*)\|\]')
+        self.insert  = re.compile(r'\[\|([^\[\]`]*)\]')
+        self.replace = re.compile(r'\[([^\[\]`]*)\|([^\[\]`]*)\]')
+        self.comment = re.compile(r'\(\(([^\(\)`]*)\)\)')
     def updateContent(self):
         try:
             os.stat(self.path)
@@ -101,7 +101,7 @@ class fileViewer(QtGui.QMainWindow):
             eprint(e)
             QtGui.qApp.quit()
     def preparse_(self,text):
-        text = self.comment.sub(r'_\1_',text)
+        text = self.comment.sub(r'_(\1)_',text)
         text = self.delete.sub(r'~~\1~~',text)
         text = self.insert.sub(r'__\1__',text)
         text = self.replace.sub(r'~~\1~~__\2__',text)

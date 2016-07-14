@@ -3,6 +3,8 @@
 
 A simple markdown viewer for displaying proofreading written in Python.
 
+![Proofying Viewer](https://github.com/xr0038/proofying/raw/screenshots/proofying_viewer.png)
+
 ## Usage
 
 ~~~sh
@@ -46,6 +48,8 @@ Special writing methods is implemented for correcting sentences. Details are des
 |&#91;A&#x7c;]| Delete A|
 |&#91;&#x7c;B]| Insert B|
 |&#x28;&#x28;comment))| Add a comment|
+
+![Proofying Viewer](https://github.com/xr0038/proofying/raw/screenshots/proofying_sample.png)
 
 ### Menu
 A `File` menu is implemented, containing `Exit`, `Print`, and `Print Preview`. You can print out the corrected document from a printer or into a pdf file.

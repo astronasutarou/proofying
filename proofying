@@ -5,18 +5,20 @@ import sys,os,re,time,signal
 import codecs,misaka
 from argparse import ArgumentParser
 from subprocess import check_output
-from PyQt4 import QtGui
-from PyQt4.QtCore import Qt,QTimer
-from PyQt4.QtWebKit import QWebView
+from PyQt5.QtGui import QIcon
+from PyQt5.QtWidgets import qApp, QMainWindow, QAction, QApplication, QDialog
+from PyQt5.QtPrintSupport import QPrinter, QPrintDialog
+from PyQt5.QtCore import Qt,QTimer
+from PyQt5.QtWebKitWidgets import QWebView
 
 def eprint(*args, **kwargs):
     print(*args, file=sys.stderr, **kwargs)
 
-class fileViewer(QtGui.QMainWindow):
+class fileViewer(QMainWindow):
     def __init__(self,path):
         super(fileViewer,self).__init__()
         self.path = path
-        self.printer = QtGui.QPrinter()
+        self.printer = QPrinter()
 
         self.initLayout()
         self.initMenu()
@@ -28,18 +30,18 @@ class fileViewer(QtGui.QMainWindow):
         self.setCentralWidget(self.view)
         self.updateStatusBar('{0}'.format(self.path))
     def initMenu(self):
-        exitAction = QtGui.QAction(
-            QtGui.QIcon('exit.png'), '&Exit', self)
+        exitAction = QAction(
+            QIcon('exit.png'), '&Exit', self)
         exitAction.setShortcut('Ctrl+W')
         exitAction.setStatusTip('Exit application')
-        exitAction.triggered.connect(QtGui.qApp.quit)
-        printAction = QtGui.QAction(
-            QtGui.QIcon('print.png'), '&Print', self)
+        exitAction.triggered.connect(qApp.quit)
+        printAction = QAction(
+            QIcon('print.png'), '&Print', self)
         printAction.setShortcut('Ctrl+P')
         printAction.setStatusTip('Print page')
         printAction.triggered.connect(self.print_)
-        previewAction = QtGui.QAction(
-            QtGui.QIcon('preview.png'), 'Print Preview', self)
+        previewAction = QAction(
+            QIcon('preview.png'), 'Print Preview', self)
         previewAction.setShortcut('Ctrl+Shift+P')
         previewAction.setStatusTip('Show print preview')
         previewAction.triggered.connect(self.preview_)
@@ -99,7 +101,7 @@ class fileViewer(QtGui.QMainWindow):
                             time.strftime('%Y-%m-%d %H:%M:%S')))
         except Exception as e:
             eprint(e)
-            QtGui.qApp.quit()
+            qApp.quit()
     def preparse_(self,text):
         text = self.comment.sub(r'_(&#8203;\1&#8203;)_',text)
         text = self.delete.sub(r'~~&#8203;\1&#8203;~~',text)
@@ -107,11 +109,11 @@ class fileViewer(QtGui.QMainWindow):
         text = self.replace.sub(r'~~&#8203;\1&#8203;~~__&#8203;\2&#8203;__',text)
         return text
     def print_(self):
-        dialog = QtGui.QPrintDialog()
-        if dialog.exec_() == QtGui.QDialog.Accepted:
+        dialog = QPrintDialog()
+        if dialog.exec_() == QDialog.Accepted:
             self.view.print_(dialog.printer())
     def preview_(self):
-        dialog = QtGui.QPrintPreviewDialog()
+        dialog = QPrintPreviewDialog()
         dialog.paintRequested.connect(self.view.print_)
         dialog.exec_()
 
@@ -137,7 +139,7 @@ if __name__ == '__main__':
     if (args.mathjax):
         mathjax=u"""<script type="text/x-mathjax-config">MathJax.Hub.Config({ tex2jax: {inlineMath: [ ['$','$'] ]} });</script><script src="http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS_HTML" language="JavaScript"></script>"""
     path = os.path.abspath(args.path)
-    app = QtGui.QApplication(sys.argv)
+    app = QApplication(sys.argv)
     win = fileViewer(path)
     win.show()
     app.exec_()

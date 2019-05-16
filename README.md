@@ -58,9 +58,8 @@ A `File` menu is implemented, containing `Exit`, `Print`, and `Print Preview`. Y
 ## Requirement
 This program is depend on these packages:
 
-- [PyQt4](https://pypi.python.org/pypi/PyQt4)
+- [PyQt5](https://pypi.python.org/pypi/PyQt5)
 - [misaka](https://pypi.python.org/pypi/misaka)
-- [argparse](https://pypi.python.org/pypi/argparse)
 
 ## License
 This program is licensed by GNU General Public License. Detailed descriptions are available in [GPL3.0](https://github.com/xr0038/proofying/blob/master/LICENSE)

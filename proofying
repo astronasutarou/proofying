@@ -5,11 +5,13 @@ import sys,os,re,time,signal
 import codecs,misaka
 from argparse import ArgumentParser
 from subprocess import check_output
-from PyQt5.QtGui import QIcon
-from PyQt5.QtWidgets import qApp, QMainWindow, QAction, QApplication, QDialog
-from PyQt5.QtPrintSupport import QPrinter, QPrintDialog
-from PyQt5.QtCore import Qt,QTimer
-from PyQt5.QtWebKitWidgets import QWebView
+from PyQt5.QtGui import QIcon, QPageLayout, QPageSize
+from PyQt5.QtWidgets import qApp, QMainWindow, QAction, QApplication
+from PyQt5.QtWidgets import QDialog, QFileDialog
+from PyQt5.QtPrintSupport import QPrinter, QPrintDialog, QPrintPreviewDialog
+from PyQt5.QtCore import Qt, QTimer, QMarginsF
+from PyQt5.QtWebEngineWidgets import QWebEngineView
+
 
 def eprint(*args, **kwargs):
     print(*args, file=sys.stderr, **kwargs)
@@ -18,7 +20,13 @@ class fileViewer(QMainWindow):
     def __init__(self,path):
         super(fileViewer,self).__init__()
         self.path = path
-        self.printer = QPrinter()
+
+        margins = QMarginsF(16,12,16,16)
+        pagesize = QPageSize(QPageSize.A4)
+        self.print_layout = QPageLayout()
+        self.print_layout.setPageSize(pagesize)
+        self.print_layout.setMargins(margins)
+        self.print_layout.setOrientation(QPageLayout.Portrait)
 
         self.initLayout()
         self.initMenu()
@@ -26,7 +34,7 @@ class fileViewer(QMainWindow):
         self.setupViewer()
     def initLayout(self):
         self.setWindowTitle('Proofying Viewer')
-        self.view = QWebView()
+        self.view = QWebEngineView()
         self.setCentralWidget(self.view)
         self.updateStatusBar('{0}'.format(self.path))
     def initMenu(self):
@@ -75,10 +83,11 @@ class fileViewer(QMainWindow):
             os.stat(self.path)
             md5sum = check_output(('md5sum', self.path))
             if not self.scroll_done:
-                mf = self.view.page().mainFrame()
-                if mf.scrollBarMaximum(Qt.Vertical)>0:
-                    mf.scroll(self.scroll_x, self.scroll_y)
-                    self.scroll_done = True
+                page = self.view.page()
+                page.runJavaScript(
+                  'window.scrollTo({}, {});'.format(
+                  self.scroll_x, self.scroll_y))
+                self.scroll_done = True
             if (self.md5sum != md5sum):
                 self.updateStatusBar('Updating...')
                 self.md5sum = md5sum
@@ -88,12 +97,13 @@ class fileViewer(QMainWindow):
                     html = u'''<html><head>{0}</head><body>{1}{2}</body></html>
                 '''.format(style,self.md(self.text),mathjax)
                     self.layout().removeWidget(self.view)
-                    mf = self.view.page().mainFrame()
-                    self.scroll_x = mf.scrollBarValue(Qt.Horizontal)
-                    self.scroll_y = mf.scrollBarValue(Qt.Vertical)
+                    page = self.view.page()
+                    scrollBar = page.scrollPosition()
+                    self.scroll_x = scrollBar.x()
+                    self.scroll_y = scrollBar.y()
                     self.scroll_done = False
                     self.view.setParent(None)
-                    self.view = QWebView()
+                    self.view = QWebEngineView()
                     self.view.setHtml(html)
                     self.setCentralWidget(self.view)
                     self.updateStatusBar(
@@ -103,18 +113,23 @@ class fileViewer(QMainWindow):
             eprint(e)
             qApp.quit()
     def preparse_(self,text):
-        text = self.comment.sub(r'_(&#8203;\1&#8203;)_',text)
-        text = self.delete.sub(r'~~&#8203;\1&#8203;~~',text)
-        text = self.insert.sub(r'__&#8203;\1&#8203;__',text)
-        text = self.replace.sub(r'~~&#8203;\1&#8203;~~__&#8203;\2&#8203;__',text)
+        text = self.comment.sub(
+                 r'_(&#8203;\1&#8203;)_',text)
+        text = self.delete.sub(
+                 r'~~&#8203;\1&#8203;~~',text)
+        text = self.insert.sub(
+                 r'__&#8203;\1&#8203;__',text)
+        text = self.replace.sub(
+                 r'~~&#8203;\1&#8203;~~__&#8203;\2&#8203;__',text)
         return text
     def print_(self):
-        dialog = QPrintDialog()
-        if dialog.exec_() == QDialog.Accepted:
-            self.view.print_(dialog.printer())
+        filename,filetype = QFileDialog.getSaveFileName(self,
+            'Select Print Output PDF file', '.', 'PDF file (*.pdf)')
+        if filename:
+          self.view.page().printToPdf(filename, self.print_layout)
     def preview_(self):
+        print('temporarily disabled')
         dialog = QPrintPreviewDialog()
-        dialog.paintRequested.connect(self.view.print_)
         dialog.exec_()
 
 
@@ -133,7 +148,7 @@ if __name__ == '__main__':
         help='enable mathjax engine [network required]')
     args = parser.parse_args()
 
-    style=u"""<style>strong{color:red;font-weight:400;}u{color:green;}</style>"""
+    style=u"""<style>body{background:#fff;font-family:sans-serif;font-size:12pt;padding:2em 2em 1em;text-align:justify;}strong{color:blue;font-weight:400;}u{color:green;}del{font-weight:400;color:red;}</style>"""
     mathjax=u""""""
 
     if (args.mathjax):
